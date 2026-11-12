@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendas API - Cadastro de Clientes</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background-color: #f4f4f9; }
+        .card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input, button { display: block; width: 100%; margin-bottom: 10px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #007BFF; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #0056b3; }
+        ul { padding-left: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Cadastrar Cliente</h2>
+        <form id="clienteForm">
+            <input type="text" id="nome" placeholder="Nome do Cliente" required>
+            <input type="email" id="email" placeholder="E-mail" required>
+            <button type="submit">Salvar Cliente</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Lista de Clientes</h2>
+        <button onclick="carregarClientes()">Atualizar Lista</button>
+        <ul id="listaClientes"></ul>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080/clientes';
+
+        // Cadastrar cliente
+        document.getElementById('clienteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nome = document.getElementById('nome').value;
+            const email = document.getElementById('email').value;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, email })
+                });
+
+                if (response.ok) {
+                    alert('Cliente cadastrado com sucesso!');
+                    document.getElementById('clienteForm').reset();
+                    carregarClientes();
+                } else {
+                    alert('Erro ao cadastrar cliente.');
+                }
+            } catch (error) {
+                console.error('Erro de conexão:', error);
+                alert('Não foi possível conectar à API.');
+            }
+        });
+
+        // Listar clientes
+        async function carregarClientes() {
+            try {
+                const response = await fetch(API_URL);
+                const clientes = await response.json();
+                
+                const lista = document.getElementById('listaClientes');
+                lista.innerHTML = '';
+
+                clientes.forEach(c => {
+                    const li = document.createElement('li');
+                    li.textContent = `${c.id} - ${c.nome} (${c.email})`;
+                    lista.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar clientes:', error);
+            }
+        }
+
+        // Carregar ao iniciar a página
+        carregarClientes();
+    </script>
+</body>
+</html>
